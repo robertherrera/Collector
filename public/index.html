@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark light" />
+  <title>TrainStash</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23111214'/%3E%3Cpath d='M9 8h14a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3v-9a3 3 0 0 1 3-3zm0 3v5h14v-5H9zm2 12l-3 4h3l2-3h6l2 3h3l-3-4H11z' fill='%23e8b04b'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#collection" aria-label="TrainStash home">
+        <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="var(--accent)"/><path d="M9 8h14a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3v-9a3 3 0 0 1 3-3zm0 3v5h14v-5H9zm2 12l-3 4h3l2-3h6l2 3h3l-3-4H11z" fill="#141210"/></svg>
+        <span>TrainStash</span>
+      </a>
+      <nav class="tabs" aria-label="Main">
+        <a href="#collection" data-view="collection" class="tab is-active">Collection</a>
+        <a href="#wishlist" data-view="wishlist" class="tab">Wishlist <span class="tab-count" id="wishlistCount" hidden></span></a>
+        <a href="#insights" data-view="insights" class="tab">Insights</a>
+      </nav>
+      <div class="topbar-actions">
+        <label class="search" aria-label="Search collection">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input id="searchInput" type="search" placeholder="Search…" autocomplete="off" />
+          <kbd>/</kbd>
+        </label>
+        <button class="icon-btn" id="menuBtn" type="button" aria-label="More" aria-haspopup="menu">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>
+        </button>
+        <div class="menu" id="menu" hidden role="menu">
+          <button type="button" role="menuitem" data-action="theme"><span id="themeLabel">Switch to light theme</span></button>
+          <div class="menu-sep"></div>
+          <a role="menuitem" href="/api/export.csv">Export CSV</a>
+          <a role="menuitem" href="/api/export.json">Download JSON backup</a>
+          <button type="button" role="menuitem" data-action="restore">Restore from backup…</button>
+          <input type="file" id="restoreFile" accept="application/json,.json" hidden />
+          <div class="menu-sep"></div>
+          <button type="button" role="menuitem" data-action="about">About TrainStash</button>
+        </div>
+        <button class="btn btn-primary" id="addBtn" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          <span>Add train</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <!-- Collection / Wishlist -->
+    <section id="view-collection" class="view">
+      <div class="page-head">
+        <div>
+          <h1 id="viewTitle">Your collection</h1>
+          <p class="muted" id="viewSubtitle">Everything on the roster, at a glance.</p>
+        </div>
+      </div>
+
+      <div class="stats" id="statsStrip"></div>
+
+      <div class="toolbar">
+        <div class="filters" id="filters"></div>
+        <div class="toolbar-right">
+          <label class="select-wrap">
+            <span class="sr-only">Sort</span>
+            <select id="sortSelect">
+              <option value="newest">Newest first</option>
+              <option value="oldest">Oldest first</option>
+              <option value="value_desc">Highest value</option>
+              <option value="value_asc">Lowest value</option>
+              <option value="brand">Brand A–Z</option>
+              <option value="road">Railroad A–Z</option>
+              <option value="catalog">Catalog #</option>
+            </select>
+          </label>
+          <div class="seg" role="group" aria-label="Layout">
+            <button type="button" class="seg-btn is-active" data-layout="grid" aria-label="Grid view"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1.5"/><rect x="14" y="4" width="6" height="6" rx="1.5"/><rect x="4" y="14" width="6" height="6" rx="1.5"/><rect x="14" y="14" width="6" height="6" rx="1.5"/></svg></button>
+            <button type="button" class="seg-btn" data-layout="list" aria-label="List view"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+          </div>
+        </div>
+      </div>
+
+      <p class="result-count muted" id="resultCount"></p>
+      <div class="grid" id="itemGrid"></div>
+      <div class="empty" id="emptyState" hidden></div>
+    </section>
+
+    <!-- Insights -->
+    <section id="view-insights" class="view" hidden>
+      <div class="page-head">
+        <div>
+          <h1>Insights</h1>
+          <p class="muted">How the roster breaks down.</p>
+        </div>
+      </div>
+      <div id="insights"></div>
+    </section>
+  </main>
+
+  <!-- Detail drawer -->
+  <div class="drawer-backdrop" id="drawerBackdrop" hidden></div>
+  <aside class="drawer" id="drawer" hidden aria-label="Item details">
+    <div id="drawerContent"></div>
+  </aside>
+
+  <!-- Edit modal -->
+  <div class="modal-backdrop" id="modalBackdrop" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <form id="itemForm" novalidate>
+        <div class="modal-head">
+          <div>
+            <h2 id="modalTitle">Add train</h2>
+            <p class="muted" id="modalSubtitle">Only one identifying field is required. Fill in what you know.</p>
+          </div>
+          <button type="button" class="icon-btn" id="modalClose" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+        </div>
+
+        <div class="modal-body">
+          <fieldset class="fs">
+            <legend>Identity</legend>
+            <div class="row">
+              <label class="field span-2"><span>Status</span>
+                <div class="pillset" id="statusPills">
+                  <label><input type="radio" name="status" value="owned" checked /><span>In collection</span></label>
+                  <label><input type="radio" name="status" value="wishlist" /><span>Wishlist</span></label>
+                  <label><input type="radio" name="status" value="sold" /><span>Sold</span></label>
+                </div>
+              </label>
+            </div>
+            <div class="row">
+              <label class="field"><span>Brand</span><input name="brand" list="brandList" placeholder="Kato, Athearn, Bachmann…" /></label>
+              <label class="field"><span>Scale</span><input name="scale" list="scaleList" placeholder="N, HO, O…" /></label>
+              <label class="field"><span>Catalog #</span><input name="catalog_number" placeholder="126-4014" /></label>
+            </div>
+            <div class="row">
+              <label class="field"><span>Category</span>
+                <select name="category">
+                  <option value="locomotive">Locomotive</option>
+                  <option value="rolling_stock">Freight car</option>
+                  <option value="passenger">Passenger car</option>
+                  <option value="set">Train set</option>
+                  <option value="track">Track</option>
+                  <option value="structure">Structure</option>
+                  <option value="accessory">Accessory</option>
+                  <option value="other">Other</option>
+                </select>
+              </label>
+              <label class="field"><span>Type</span><input name="subtype" list="subtypeList" placeholder="Diesel, Steam, Boxcar…" /></label>
+              <label class="field"><span>Model</span><input name="name" placeholder="SD70ACe, 50' boxcar…" /></label>
+            </div>
+            <div class="row">
+              <label class="field span-2"><span>Railroad / road name</span><input name="road_name" list="roadList" placeholder="Union Pacific" /></label>
+              <label class="field"><span>Road number</span><input name="road_number" placeholder="8444" /></label>
+            </div>
+          </fieldset>
+
+          <fieldset class="fs">
+            <legend>Details</legend>
+            <div class="row">
+              <label class="field"><span>Control</span>
+                <select name="dcc">
+                  <option value="na">Not applicable</option>
+                  <option value="dc">DC only</option>
+                  <option value="dcc_ready">DCC ready</option>
+                  <option value="dcc">DCC equipped</option>
+                  <option value="dcc_sound">DCC + sound</option>
+                </select>
+              </label>
+              <label class="field"><span>Condition</span>
+                <select name="condition">
+                  <option value="">Not rated</option>
+                  <option value="mint">Mint</option>
+                  <option value="excellent">Excellent</option>
+                  <option value="good">Good</option>
+                  <option value="fair">Fair</option>
+                  <option value="poor">Poor</option>
+                </select>
+              </label>
+              <label class="field"><span>Quantity</span><input name="quantity" type="number" min="0" step="1" value="1" /></label>
+            </div>
+            <div class="row">
+              <label class="check span-3"><input type="checkbox" name="original_box" /><span>Has original box and packaging</span></label>
+            </div>
+          </fieldset>
+
+          <fieldset class="fs">
+            <legend>Money</legend>
+            <div class="row">
+              <label class="field"><span>Paid ($)</span><input name="purchase_price" type="number" min="0" step="0.01" placeholder="0.00" inputmode="decimal" /></label>
+              <label class="field"><span>Purchased</span><input name="purchase_date" placeholder="2024-05 or 2024" /></label>
+              <label class="field"><span>From</span><input name="purchased_from" placeholder="Hobby shop, eBay, show…" /></label>
+            </div>
+            <div class="row">
+              <label class="field"><span>Estimated value ($)</span><input name="estimated_value" type="number" min="0" step="0.01" placeholder="0.00" inputmode="decimal" /></label>
+              <label class="field sold-only"><span>Sold for ($)</span><input name="sold_price" type="number" min="0" step="0.01" placeholder="0.00" inputmode="decimal" /></label>
+              <label class="field sold-only"><span>Sold on</span><input name="sold_date" placeholder="2025-01" /></label>
+            </div>
+          </fieldset>
+
+          <fieldset class="fs">
+            <legend>Storage &amp; notes</legend>
+            <div class="row">
+              <label class="field span-2"><span>Location</span><input name="location" list="locationList" placeholder="Shelf A, Box 3, Layout…" /></label>
+              <label class="field"><span>Tags</span><input name="tags" placeholder="steam, weathered, era 4" /></label>
+            </div>
+            <div class="row">
+              <label class="field span-3"><span>Notes</span><textarea name="notes" rows="3" placeholder="Decoder installed, couplers swapped, running quirks…"></textarea></label>
+            </div>
+          </fieldset>
+
+          <fieldset class="fs">
+            <legend>Photos</legend>
+            <div class="photo-editor" id="photoEditor">
+              <div class="photo-thumbs" id="photoThumbs"></div>
+              <div class="photo-add">
+                <label class="dropzone" id="dropzone">
+                  <input type="file" id="photoFiles" accept="image/*" multiple hidden />
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0-4 4m4-4 4 4M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+                  <span><strong>Upload photos</strong> or drop them here</span>
+                </label>
+                <div class="url-add">
+                  <input type="url" id="photoUrl" placeholder="…or paste an image URL" />
+                  <button type="button" class="btn" id="photoUrlAdd">Add</button>
+                </div>
+              </div>
+            </div>
+          </fieldset>
+        </div>
+
+        <div class="modal-foot">
+          <p class="form-error" id="formError" role="alert"></p>
+          <div class="modal-foot-actions">
+            <button type="button" class="btn" id="modalCancel">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="modalSave">Save train</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <datalist id="brandList"></datalist>
+  <datalist id="scaleList">
+    <option value="Z"></option><option value="N"></option><option value="TT"></option><option value="HO"></option>
+    <option value="HOn3"></option><option value="S"></option><option value="O"></option><option value="On30"></option>
+    <option value="G"></option><option value="1"></option>
+  </datalist>
+  <datalist id="subtypeList">
+    <option value="Diesel"></option><option value="Steam"></option><option value="Electric"></option>
+    <option value="Boxcar"></option><option value="Hopper"></option><option value="Tank car"></option><option value="Gondola"></option>
+    <option value="Flatcar"></option><option value="Reefer"></option><option value="Caboose"></option><option value="Coach"></option>
+    <option value="Sleeper"></option><option value="Dome"></option><option value="Observation"></option>
+  </datalist>
+  <datalist id="roadList"></datalist>
+  <datalist id="locationList"></datalist>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <template id="aboutTpl">
+    <div class="about">
+      <h2>TrainStash</h2>
+      <p>A small, self-hosted tracker for your model train collection. Everything is stored locally in a single SQLite file in the <code>data</code> folder next to the app.</p>
+      <p>Download a JSON backup now and then; it's the whole roster in one file.</p>
+      <p class="muted">Tips: press <kbd>/</kbd> to search, <kbd>n</kbd> to add a train, <kbd>Esc</kbd> to close panels.</p>
+    </div>
+  </template>
+
+  <script src="/app.js" defer></script>
+</body>
+</html>
