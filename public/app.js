@@ -1,4 +1,4 @@
-/* TrainStash — front-end. Plain JS, no build step. */
+/* Train Collection — front-end. Plain JS, no build step. */
 (() => {
   'use strict';
 

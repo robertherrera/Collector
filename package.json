@@ -1,5 +1,5 @@
 {
-  "name": "trainstash",
+  "name": "train-collection",
   "version": "1.0.0",
   "description": "A fast, lightweight, self-hosted model train collection tracker.",
   "private": true,

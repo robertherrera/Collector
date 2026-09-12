@@ -95,13 +95,13 @@ app.delete('/api/items/:id/photos/:pid', (req, res) => {
 app.get('/api/stats', (_req, res) => res.json(store.stats()));
 
 app.get('/api/export.json', (_req, res) => {
-  res.setHeader('Content-Disposition', `attachment; filename="trainstash-backup-${today()}.json"`);
+  res.setHeader('Content-Disposition', `attachment; filename="train-collection-backup-${today()}.json"`);
   res.json(store.exportAll());
 });
 
 app.get('/api/export.csv', (_req, res) => {
   res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-  res.setHeader('Content-Disposition', `attachment; filename="trainstash-${today()}.csv"`);
+  res.setHeader('Content-Disposition', `attachment; filename="train-collection-${today()}.csv"`);
   res.send(store.exportCsv());
 });
 
@@ -140,6 +140,6 @@ function today() {
 }
 
 app.listen(PORT, HOST, () => {
-  console.log(`\n  🚂  TrainStash is running at http://${HOST === '0.0.0.0' ? 'localhost' : HOST}:${PORT}`);
+  console.log(`\n  🚂  Train Collection is running at http://${HOST === '0.0.0.0' ? 'localhost' : HOST}:${PORT}`);
   console.log(`      Data lives in ${store.DATA_DIR}\n`);
 });

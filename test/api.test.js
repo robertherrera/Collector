@@ -7,7 +7,7 @@ import path from 'node:path';
 
 const PORT = 4499;
 const BASE = `http://127.0.0.1:${PORT}`;
-const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'trainstash-test-'));
+const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'train-collection-test-'));
 let server;
 
 async function waitForServer(tries = 50) {
@@ -31,7 +31,7 @@ const json = async (method, p, body, type = 'application/json') => {
 
 before(async () => {
   server = spawn(process.execPath, ['--disable-warning=ExperimentalWarning', 'server.js'], {
-    env: { ...process.env, PORT: String(PORT), TRAINSTASH_DATA_DIR: dataDir },
+    env: { ...process.env, PORT: String(PORT), TRAIN_COLLECTION_DATA_DIR: dataDir },
     stdio: 'ignore',
   });
   await waitForServer();

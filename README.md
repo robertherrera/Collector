@@ -1,10 +1,10 @@
-# TrainStash
+# Train Collection
 
 A fast, lightweight, self-hosted tracker for your model train collection.
 Runs entirely on your own machine, stores everything in one SQLite file, and has
 no build step, no accounts, and no cloud.
 
-![TrainStash collection view](docs/collection.png)
+![Train Collection view](docs/collection.png)
 
 ## What it does
 
@@ -77,8 +77,8 @@ Everything is stored in the `data/` folder next to the app:
 
 ```
 data/
-├── trainstash.db      # the SQLite database (all items, photo records)
-└── uploads/           # photos you uploaded
+├── train-collection.db  # the SQLite database (all items, photo records)
+└── uploads/             # photos you uploaded
 ```
 
 To back up, copy that folder, or use **⋮ → Download JSON backup** in the app.
@@ -88,22 +88,22 @@ You can point the app somewhere else, for example an external drive or iCloud
 folder, with an environment variable:
 
 ```sh
-TRAINSTASH_DATA_DIR="$HOME/Documents/TrainStash" npm start
+TRAIN_COLLECTION_DATA_DIR="$HOME/Documents/Train Collection" npm start
 ```
 
 ## Optional: run it in the background and at login
 
-If you'd like TrainStash to always be running on the Mac mini, use
+If you'd like Train Collection to always be running on the Mac mini, use
 [pm2](https://pm2.keymetrics.io/) (MIT licensed):
 
 ```sh
 npm install -g pm2
-pm2 start server.js --name trainstash --node-args="--disable-warning=ExperimentalWarning"
+pm2 start server.js --name train-collection --node-args="--disable-warning=ExperimentalWarning"
 pm2 save
 pm2 startup      # prints one command to run so pm2 starts at login
 ```
 
-Then `pm2 logs trainstash` shows the log, `pm2 stop trainstash` stops it.
+Then `pm2 logs train-collection` shows the log, `pm2 stop train-collection` stops it.
 
 ## Optional: reach it from your iPad or phone
 
@@ -123,7 +123,7 @@ There is no login, so only do this on a network you trust.
 | --- | --- | --- |
 | `PORT` | `4400` | Port to listen on |
 | `HOST` | `127.0.0.1` | Interface to bind; use `0.0.0.0` for LAN access |
-| `TRAINSTASH_DATA_DIR` | `./data` | Where the database and uploads are stored |
+| `TRAIN_COLLECTION_DATA_DIR` | `./data` | Where the database and uploads are stored |
 
 ## Development
 

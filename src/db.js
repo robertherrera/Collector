@@ -2,14 +2,23 @@ import { DatabaseSync } from 'node:sqlite';
 import fs from 'node:fs';
 import path from 'node:path';
 
-export const DATA_DIR = process.env.TRAINSTASH_DATA_DIR
-  ? path.resolve(process.env.TRAINSTASH_DATA_DIR)
+export const DATA_DIR = process.env.TRAIN_COLLECTION_DATA_DIR
+  ? path.resolve(process.env.TRAIN_COLLECTION_DATA_DIR)
   : path.resolve(process.cwd(), 'data');
 export const UPLOAD_DIR = path.join(DATA_DIR, 'uploads');
 
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
-export const db = new DatabaseSync(path.join(DATA_DIR, 'trainstash.db'));
+const DB_PATH = path.join(DATA_DIR, 'train-collection.db');
+// The app used to be called TrainStash; pick up a database created under the old name.
+const LEGACY_DB_PATH = path.join(DATA_DIR, 'trainstash.db');
+if (!fs.existsSync(DB_PATH) && fs.existsSync(LEGACY_DB_PATH)) {
+  for (const suffix of ['', '-wal', '-shm']) {
+    if (fs.existsSync(LEGACY_DB_PATH + suffix)) fs.renameSync(LEGACY_DB_PATH + suffix, DB_PATH + suffix);
+  }
+}
+
+export const db = new DatabaseSync(DB_PATH);
 db.exec('PRAGMA journal_mode = WAL');
 db.exec('PRAGMA foreign_keys = ON');
 
